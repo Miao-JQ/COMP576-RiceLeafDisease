@@ -2,7 +2,7 @@ import os
 import cv2
 import numpy as np
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import LabelEncoder
 
 
@@ -63,36 +63,15 @@ class RiceDiseaseDataset(Dataset):
                 return torch.zeros((3, image.shape[0], image.shape[1]), dtype=torch.float32)
 
     def __len__(self):
-        """
-        Returns the total number of samples.
-        """
         return len(self.images)
 
     def __getitem__(self, idx):
-        """
-        Retrieves an image and its corresponding label.
-
-        Args:
-            idx (int): Index of the sample to retrieve.
-
-        Returns:
-            torch.Tensor: Image tensor.
-            int: Encoded label.
-        """
         image = self.images[idx]
         label = self.labels_encoded[idx]
         return image, label
 
 
-# Example usage
-if __name__ == "__main__":
-    data_dir = './dataset'
-    target_shape = None  # Set to None to avoid resizing
-
-    # Initialize dataset
-    dataset = RiceDiseaseDataset(data_dir, target_shape)
-
-    # Split dataset
+def create_dataset(dataset):
     train_size = int(0.64 * len(dataset))
     val_size = int(0.16 * len(dataset))
     test_size = len(dataset) - train_size - val_size
@@ -105,5 +84,12 @@ if __name__ == "__main__":
     print("Number of Validation Images: ", len(val_dataset))
     print("Number of Test Images: ", len(test_dataset))
 
-    sample_image, sample_label = train_dataset.__getitem__(0)
-    print("Sample Image Size: ", sample_image.shape, "Label: ", sample_label)
+    return train_dataset, val_dataset, test_dataset
+
+
+def create_dataloader(train_dataset, val_dataset, test_dataset, batch_size, num_workers=0):
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, num_workers=num_workers, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, num_workers=num_workers, shuffle=False)
+
+    return train_loader, val_loader, test_loader

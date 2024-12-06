@@ -1,5 +1,5 @@
 python                    3.12.7               h14ffc60_0
-pytorch                   2.5.1           py3.12_cuda12.4_cudnn9_0    pytorch
+torch                     2.5.1           py3.12_cuda12.4_cudnn9_0    pytorch
 scikit-learn              1.5.1           py312h0158946_0
 scipy                     1.14.1          py312h9d85e7c_0
 torchvision               0.20.1                   pypi_0    pypi
