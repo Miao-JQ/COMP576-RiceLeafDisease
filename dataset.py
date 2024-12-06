@@ -1,22 +1,16 @@
 import os
-import cv2
-import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from sklearn.preprocessing import LabelEncoder
-
+from torchvision import transforms
+from PIL import Image
+from torch.utils.data import DataLoader
 
 class RiceDiseaseDataset(Dataset):
-    def __init__(self, data_dir, target_shape=None):
-        """
-        Initializes the dataset by loading and processing images and labels.
-
-        Args:
-            data_dir (str): Path to the root directory containing subdirectories of images for each disease class.
-            target_shape (tuple or None): Target shape for resizing images. If None, no resizing is performed.
-        """
+    def __init__(self, data_dir, target_shape=None, augment=False):
         self.data_dir = data_dir
         self.target_shape = target_shape
+        self.augment = augment
         self.disease_dirs = {disease: os.path.join(data_dir, disease) for disease in os.listdir(data_dir)}
         self.images = []
         self.labels = []
@@ -24,51 +18,51 @@ class RiceDiseaseDataset(Dataset):
         self._load_data()
         self.labels_encoded = self.label_encoder.fit_transform(self.labels)
 
+        # Define transforms
+        self.transform = self._get_transforms()
+
     def _load_data(self):
-        """
-        Loads images and corresponding labels from the directories.
-        """
         for label, directory in self.disease_dirs.items():
             if not os.path.isdir(directory):
                 continue
             for file in os.listdir(directory):
                 if file.endswith('.jpg') or file.endswith('.JPG'):
                     file_path = os.path.join(directory, file)
-                    image = self._load_and_resize_image(file_path)
-                    self.images.append(image)
+                    self.images.append(file_path)
                     self.labels.append(label)
-        self.images = np.array(self.images)
 
-    def _load_and_resize_image(self, file_path):
-        """
-        Loads an image and resizes it if target_shape is specified.
-
-        Args:
-            file_path (str): Path to the image file.
-
-        Returns:
-            torch.Tensor: Image tensor, optionally resized and permuted to CHW format.
-        """
-        image = cv2.imread(file_path)
-        if image is not None:
-            if self.target_shape is not None:
-                image = cv2.resize(image, self.target_shape)  # Resize if target_shape is specified
-            image_tensor = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1)  # Convert to CHW
-            return image_tensor
+    def _get_transforms(self):
+        if self.augment:
+            return transforms.Compose([
+                transforms.Resize(self.target_shape) if self.target_shape else transforms.Lambda(lambda x: x),
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomRotation(degrees=15),
+                transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
         else:
-            if self.target_shape is not None:
-                return torch.zeros((3, self.target_shape[0], self.target_shape[1]), dtype=torch.float32)
-            else:
-                # If no target_shape is specified, return an empty image with the original shape
-                return torch.zeros((3, image.shape[0], image.shape[1]), dtype=torch.float32)
+            return transforms.Compose([
+                transforms.Resize(self.target_shape) if self.target_shape else transforms.Lambda(lambda x: x),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
 
     def __len__(self):
         return len(self.images)
 
     def __getitem__(self, idx):
-        image = self.images[idx]
+        image_path = self.images[idx]
         label = self.labels_encoded[idx]
+
+        # Load image using PIL for compatibility with torchvision.transforms
+        image = Image.open(image_path).convert("RGB")
+
+        # Apply transformations
+        image = self.transform(image)
+
         return image, label
+
 
 
 def create_dataset(dataset):
