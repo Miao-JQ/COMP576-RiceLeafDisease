@@ -38,32 +38,31 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     target_shape = efficientnet_input_sizes.get(args.efficient_name, (224, 224))
-    print(target_shape)
-    # images, labels = load_data(args.data_dir)
-    #
-    # train_data, val_data, test_data = create_datasets(images, labels)
-    # train_loader, val_loader, test_loader = create_dataloader(target_shape, train_data, val_data, test_data, batch_size=args.batch_size)
-    #
-    # # Model setup
-    # model = initialize_model(args.efficient_name, num_classes=4, weights_path=args.weight_dir)
-    # model.to(args.device)
-    #
-    # # Loss and optimizer
-    # criterion = FocalLoss()
-    # optimizer = optim.SGD(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    #
-    # log_file = initialize_log_file()
-    # # Log and print args
-    # args_dict = vars(args)
-    # args_message = "Training Configuration:\n" + json.dumps(args_dict, indent=4) + "\n"
-    # log_message(log_file, args_message)
-    #
-    # # Training loop
-    # print("Starting training...")
-    # train(model, train_loader, val_loader, criterion, optimizer, log_file, args)
-    #
-    # # Test the model
-    # print("Evaluating on test dataset...")
-    # class_metrics, results = test(model, test_loader, log_file, args.device)
-    # print(f"Class metrics: {class_metrics}")
-    # print(f"Overall Accuracy: {results['overall']['accuracy']:.4f}")
+    images, labels = load_data(args.data_dir)
+
+    train_data, val_data, test_data = create_datasets(images, labels)
+    train_loader, val_loader, test_loader = create_dataloader(target_shape, train_data, val_data, test_data, batch_size=args.batch_size)
+
+    # Model setup
+    model = initialize_model(args.efficient_name, num_classes=4, weights_path=args.weight_dir)
+    model.to(args.device)
+
+    # Loss and optimizer
+    criterion = FocalLoss()
+    optimizer = optim.SGD(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+
+    log_file = initialize_log_file()
+    # Log and print args
+    args_dict = vars(args)
+    args_message = "Training Configuration:\n" + json.dumps(args_dict, indent=4) + "\n"
+    log_message(log_file, args_message)
+
+    # Training loop
+    print("Starting training...")
+    train(model, train_loader, val_loader, criterion, optimizer, log_file, args)
+
+    # Test the model
+    print("Evaluating on test dataset...")
+    class_metrics, results = test(model, test_loader, log_file, args.device)
+    print(f"Class metrics: {class_metrics}")
+    print(f"Overall Accuracy: {results['overall']['accuracy']:.4f}")
