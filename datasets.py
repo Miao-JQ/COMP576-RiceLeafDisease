@@ -42,7 +42,7 @@ def create_datasets(images, labels, train_ratio=0.64, val_ratio=0.16):
 
 
 class RiceDiseaseDataset(Dataset):
-    def __init__(self, dataset, target_shape=None, augment=False):
+    def __init__(self, dataset, target_shape, augment=False):
         """
         Dataset for rice disease classification.
 
@@ -61,18 +61,14 @@ class RiceDiseaseDataset(Dataset):
         self.transform = self._get_transforms()
 
     def _get_transforms(self):
-        """
-        Define the transformations for preprocessing and augmentation.
-
-        Returns:
-            torchvision.transforms.Compose: Composed transformations.
-        """
         if self.augment:
             return transforms.Compose([
-                transforms.Resize(self.target_shape) if self.target_shape else transforms.Lambda(lambda x: x),
+                transforms.Resize(self.target_shape),
                 transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomGrayscale(p=0.1),
                 transforms.RandomRotation(degrees=15),
                 transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+                transforms.RandomResizedCrop(size=self.target_shape, scale=(0.8, 1.25), ratio=(0.8, 1.25)),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.4444, 0.5317, 0.3068], std=[0.1910, 0.1866, 0.1844])
             ])
@@ -87,16 +83,6 @@ class RiceDiseaseDataset(Dataset):
         return len(self.images)
 
     def __getitem__(self, idx):
-        """
-        Get an item from the dataset.
-
-        Args:
-            idx (int): Index of the item to fetch.
-
-        Returns:
-            torch.Tensor: Transformed image tensor.
-            int: Encoded label corresponding to the image.
-        """
         image_path = self.images[idx]
         label = self.labels_encoded[idx]
 
@@ -109,26 +95,28 @@ class RiceDiseaseDataset(Dataset):
         return image, label
 
 
-def create_dataloader(train_data, val_data, test_data, batch_size, num_workers=0):
-    """
-    Create DataLoaders for training, validation, and testing.
+from torch.utils.data import DataLoader
 
-    Args:
-        train_data (tuple): Training dataset as (images, labels).
-        val_data (tuple): Validation dataset as (images, labels).
-        test_data (tuple): Test dataset as (images, labels).
-        batch_size (int): Batch size for the DataLoader.
-        num_workers (int, optional): Number of worker threads for data loading. Defaults to 0.
+def create_dataloader(target_shape, train_data, val_data, test_data, batch_size, num_workers=0):
+    # Initialize datasets
+    train_dataset = RiceDiseaseDataset(train_data, target_shape=target_shape, augment=True)
+    val_dataset = RiceDiseaseDataset(val_data, target_shape=target_shape, augment=False)
+    test_dataset = RiceDiseaseDataset(test_data, target_shape=target_shape, augment=False)
 
-    Returns:
-        tuple: DataLoaders for training, validation, and testing.
-    """
-    train_dataset = RiceDiseaseDataset(train_data, target_shape=(224, 224), augment=True)
-    val_dataset = RiceDiseaseDataset(val_data, target_shape=(224, 224), augment=False)
-    test_dataset = RiceDiseaseDataset(test_data, target_shape=(224, 224), augment=False)
+    # Output dataset dimensions
+    train_sample, train_label = train_dataset[0]
+    val_sample, val_label = val_dataset[0]
+    test_sample, test_label = test_dataset[0]
 
+    print("Dataset Dimensions:")
+    print(f"  Train Dataset: {len(train_dataset)} samples, Image shape: {train_sample.shape}, Label shape: {train_label}")
+    print(f"  Validation Dataset: {len(val_dataset)} samples, Image shape: {val_sample.shape}, Label shape: {val_label}")
+    print(f"  Test Dataset: {len(test_dataset)} samples, Image shape: {test_sample.shape}, Label shape: {test_label}")
+
+    # Initialize DataLoaders
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
     return train_loader, val_loader, test_loader
+
