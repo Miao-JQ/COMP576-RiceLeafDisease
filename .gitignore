@@ -4,3 +4,4 @@
 **/logs
 **/ckpt
 *.pth
+**/results

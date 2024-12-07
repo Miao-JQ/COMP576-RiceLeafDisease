@@ -9,7 +9,7 @@ Download dataset and see dataset description at https://www.kaggle.com/datasets/
 for efficientnet-b3
 
 ```
-python main.py --efficient_name=efficientnet-b3 --lr=0.0002 --weight_decay=0.002
+python main.py --efficient_name=efficientnet-b3 --lr=0.0003 --weight_decay=0.002
 ```
 
 for resnet-50:
@@ -40,7 +40,7 @@ efficient-b3: 0.9975
 
 resnet-50: 1.0000
 
-vgg16: 0.9982
+vgg16: 0.9857
 
 ### MFLOPS
 
@@ -50,16 +50,8 @@ resnet-50: 7704.627972
 
 vgg16: 27326.40282
 
-### Throughput
-
-efficient-b3: 473.75 images/sec
-
-resnet-50: 484.94 images/sec
-
-vgg16: 519.50 images/sec
-
 ### data augmentation
 
-with aug: 
+with aug: 0.9975
 
-without aug: 
+without aug: 0.9857
