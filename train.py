@@ -9,7 +9,7 @@ def train(model, train_loader, val_loader, criterion, optimizer, log_file, args)
     best_val_accuracy = 0.0
 
     # Learning rate scheduler
-    scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[9, 12], gamma=0.3)
+    scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[6, 8], gamma=0.3)
 
     # Prepare directories for saving checkpoints and logs
     start_time = datetime.now().strftime('%Y%m%d_%H%M%S')

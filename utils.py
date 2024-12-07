@@ -7,6 +7,8 @@ from PIL import Image
 from tqdm import tqdm
 import os
 from datetime import datetime
+import time
+from ptflops import get_model_complexity_info
 
 
 class FocalLoss(nn.Module):
@@ -105,3 +107,40 @@ def log_message(log_file, message):
     print(message)  # Print to console for immediate feedback
     with open(log_file, "a") as f:
         f.write(message + "\n")
+
+
+def calculate_flops(model, input_shape=(3, 224, 224)):
+    # Ensure input shape is a tuple of 3 values: (channels, height, width)
+    assert len(input_shape) == 3, "Input shape must be in the format (channels, height, width)."
+
+    # Calculate FLOPS using ptflops
+    with torch.cuda.device(0):  # Optional: ensure this runs on GPU if available
+        flops, _ = get_model_complexity_info(
+            model, input_shape, as_strings=False, print_per_layer_stat=False
+        )
+
+    return flops / 1e6  # Convert FLOPS to MFLOPS
+
+
+def calculate_throughput(model, test_loader, device='cuda'):
+    model.to(device)
+    model.eval()
+
+    total_images = 0
+    start_time = time.time()
+
+    with torch.no_grad():
+        for images, _ in test_loader:
+            images = images.to(device)
+            # Measure batch size
+            batch_size = images.size(0)
+            total_images += batch_size
+            # Forward pass
+            _ = model(images)
+
+    end_time = time.time()
+    total_time = end_time - start_time
+
+    # Calculate throughput (images per second)
+    throughput = total_images / total_time
+    return throughput

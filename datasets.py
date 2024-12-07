@@ -43,14 +43,6 @@ def create_datasets(images, labels, train_ratio=0.64, val_ratio=0.16):
 
 class RiceDiseaseDataset(Dataset):
     def __init__(self, dataset, target_shape, augment=False):
-        """
-        Dataset for rice disease classification.
-
-        Args:
-            dataset (tuple): A tuple containing (images, labels) loaded externally.
-            target_shape (tuple, optional): Desired image shape (height, width). Defaults to None.
-            augment (bool): Whether to apply data augmentation. Defaults to False.
-        """
         self.images, self.labels = dataset
         self.target_shape = target_shape
         self.augment = augment
@@ -78,6 +70,10 @@ class RiceDiseaseDataset(Dataset):
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.4444, 0.5317, 0.3068], std=[0.1910, 0.1866, 0.1844])
             ])
+        # return transforms.Compose([
+        #         transforms.Resize(self.target_shape) if self.target_shape else transforms.Lambda(lambda x: x),
+        #         transforms.ToTensor(),
+        #     ])
 
     def __len__(self):
         return len(self.images)
@@ -94,8 +90,6 @@ class RiceDiseaseDataset(Dataset):
 
         return image, label
 
-
-from torch.utils.data import DataLoader
 
 def create_dataloader(target_shape, train_data, val_data, test_data, batch_size, num_workers=0):
     # Initialize datasets
