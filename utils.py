@@ -5,6 +5,8 @@ from torch.optim.lr_scheduler import LambdaLR
 import numpy as  np
 from PIL import Image
 from tqdm import tqdm
+import os
+from datetime import datetime
 
 
 class FocalLoss(nn.Module):
@@ -49,18 +51,6 @@ def get_warmup_scheduler(optimizer, warm_up_steps, base_lr):
 
 
 def calculate_mean_std(image_paths, batch_size=100, target_size=(224, 224)):
-    """
-    计算多个图片的整体均值 (mean) 和标准差 (std)，使用增量计算避免内存溢出。
-
-    参数:
-    - image_paths: list，包含所有图片路径的列表。
-    - batch_size: 每次处理的图片批次大小。
-    - target_size: 所有图像调整到的目标尺寸。
-
-    返回:
-    - overall_mean: 每个通道的整体均值。
-    - overall_std: 每个通道的整体标准差。
-    """
     # 初始化统计量
     mean = np.zeros(3)  # 每个通道的均值
     M2 = np.zeros(3)  # 用于计算标准差的平方差
@@ -99,3 +89,19 @@ def calculate_mean_std(image_paths, batch_size=100, target_size=(224, 224)):
     std = np.sqrt(variance)
 
     return mean, std
+
+
+def initialize_log_file(log_dir="logs"):
+    os.makedirs(log_dir, exist_ok=True)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    log_file = os.path.join(log_dir, f"training_log_{timestamp}.txt")
+    with open(log_file, "w") as f:
+        f.write("Training and Testing Log\n")
+        f.write(f"Start Time: {timestamp}\n\n")
+    return log_file
+
+
+def log_message(log_file, message):
+    print(message)  # Print to console for immediate feedback
+    with open(log_file, "a") as f:
+        f.write(message + "\n")

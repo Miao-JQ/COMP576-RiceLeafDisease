@@ -1,13 +1,12 @@
-from dataset import RiceDiseaseDataset, create_datasets, create_dataloader, load_data
+from datasets import create_datasets, create_dataloader, load_data
 import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from utils import FocalLoss
+from utils import FocalLoss, initialize_log_file
 from train import train
 from test import test
 from model import initialize_model
-from utils import calculate_mean_std
 
 # Dataset and DataLoader
 efficientnet_input_sizes = {
@@ -52,11 +51,13 @@ if __name__ == '__main__':
     criterion = FocalLoss()
     optimizer = optim.SGD(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
+    log_file = initialize_log_file()
     # Training loop
     print("Starting training...")
-    train(model, train_loader, val_loader, criterion, optimizer, args)
+    train(model, train_loader, val_loader, criterion, optimizer, log_file, args)
 
     # Test the model
     print("Evaluating on test dataset...")
-    results = test(model, test_loader, args.device)
+    class_metrics, results = test(model, test_loader, log_file, args.device)
+    print(f"Class metrics: {class_metrics}")
     print(f"Overall Accuracy: {results['overall']['accuracy']:.4f}")
