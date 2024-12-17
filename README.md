@@ -9,19 +9,19 @@ Download dataset and see dataset description at https://www.kaggle.com/datasets/
 for efficientnet-b3
 
 ```
-python main.py --efficient_name=efficientnet-b3 --lr=0.0003 --weight_decay=0.002
+python main.py --model_name=efficientnet --efficient_name=efficientnet-b3 --lr=0.0003 --weight_decay=0.002
 ```
 
 for resnet-50:
 
 ```
-python main.py --efficient_name=efficientnet-b3 --lr=0.0001 --weight_decay=0.002
+python main.py --model_name=resnet50 --lr=0.0001 --weight_decay=0.002
 ```
 
 for vgg16:
 
 ```
-python main.py --efficient_name=efficientnet-b3 --lr=0.0001 --weight_decay=0.002
+python main.py --model_name=vgg16 --lr=0.0001 --weight_decay=0.002
 ```
 
 ## Results

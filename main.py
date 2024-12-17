@@ -25,13 +25,14 @@ efficientnet_input_sizes = {
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', type=str, default='./dataset')
-    parser.add_argument('--batch_size', type=int, default=64)
+    parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--epochs', type=int, default=10)
     parser.add_argument('--lr', type=float, default=0.0002)
     parser.add_argument('--weight_decay', type=float, default=0.002)
     parser.add_argument('--warm_up', action='store_true')
     parser.add_argument('--ckpt_dir', type=str, default='./ckpt')
     parser.add_argument('--logs_dir', type=str, default='./logs')
+    parser.add_argument('--model_name', type=str, default='efficientnet')
     parser.add_argument('--efficient_name', type=str, default='efficientnet-b3')
     parser.add_argument('--device', type=str, default='cuda')
     parser.add_argument('--weight_dir', type=str, default='None')
@@ -44,9 +45,14 @@ if __name__ == '__main__':
     train_loader, val_loader, test_loader = create_dataloader(target_shape, train_data, val_data, test_data, batch_size=args.batch_size)
 
     # Model setup
-    model = initialize_efficientnet(args.efficient_name, num_classes=4, weights_path=args.weight_dir)
-    # model = initialize_resnet50()
-    # model = initialize_vgg16()
+    if args.model_name == 'efficientnet':
+        model = initialize_efficientnet(args.efficient_name, num_classes=4, weights_path=args.weight_dir)
+    elif args.model_name == 'resnet50':
+        model = initialize_resnet50()
+    elif args.model_name == 'vgg16':
+        model = initialize_vgg16()
+    else:
+        raise ValueError('Invalid model name')
     model.to(args.device)
 
     # Loss and optimizer
