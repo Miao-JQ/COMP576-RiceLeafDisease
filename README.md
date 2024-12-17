@@ -24,7 +24,7 @@ for vgg16:
 python main.py --model_name=vgg16 --lr=0.0001 --weight_decay=0.002
 ```
 
-# Prediction
+## Prediction
 
 To classify an image, we can use classify_image.py. For example
 
