@@ -24,34 +24,11 @@ for vgg16:
 python main.py --model_name=vgg16 --lr=0.0001 --weight_decay=0.002
 ```
 
-## Results
+# Prediction
 
-### initial acc
+To classify an image, we can use classify_image.py. For example
 
-efficient-b3: 0.1997
+```
+python classify_image.py --input_path=[IMAGE YOU WANT TO CLASSIFY] --ckpt_path=best_model.pth
+```
 
-resnet-50: 0.3345
-
-vgg16: 0.3016
-
-### acc
-
-efficient-b3: 0.9975
-
-resnet-50: 1.0000
-
-vgg16: 0.9857
-
-### MFLOPS
-
-efficient-b3: 56.921924
-
-resnet-50: 7704.627972
-
-vgg16: 27326.40282
-
-### data augmentation
-
-with aug: 0.9975
-
-without aug: 0.9857
