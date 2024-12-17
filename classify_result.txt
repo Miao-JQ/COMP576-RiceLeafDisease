@@ -1,5 +1,0 @@
-Prediction Probabilities:
-Bacterialblight: 0.0945
-Blast: 0.0768
-Brownspot: 0.0670
-Tungro: 0.7617
